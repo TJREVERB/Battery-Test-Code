@@ -231,14 +231,6 @@ class EPS:
             pdm_states.append(actual_on & int(math.pow(2, pdm)) >> pdm)
         return pdm_states, ls
     
-    def power_pdms_on(self) -> tuple:
-        """
-        Returns total power for a list of pdms
-        :param pdms: bits object storing which pdms are on
-        :return: (tuple) 10-element list showing which pdms are on, total power draw of pdms
-        """
-        return (raw := self.raw_pdm_draw())[0], sum(raw[1])
-    
     def raw_solar_gen(self) -> list:
         """
         Returns solar generation of all three busses
