@@ -8,7 +8,7 @@ class Battery:
     Class to interface with Clydespace battery TTC node
     """
     def __init__(self):
-        self.addr = 0x2c
+        self.addr = 0x2a
         self.bus = SMBus(1)
 
         #Refer to datasheet section 12.3 for a list of commands

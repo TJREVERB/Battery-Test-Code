@@ -2,8 +2,8 @@ from eps import EPS
 from battery import Battery
 import time
 
-FETPDM = 4 # MOSFET PDM 4, when on the battery is charged by simulated solar panels
-LOADPDM = 3 # Load PDM 3, when on the battery is discharged by electronic load
+FETPDM = 7 # MOSFET PDM 7, when on the battery is charged by simulated solar panels
+LOADPDM = 1 # Load PDM 1, when on the battery is discharged by electronic load
 
 print("Initializing EPS + Battery")
 eps = EPS()
