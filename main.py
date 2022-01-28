@@ -31,7 +31,7 @@ EODC = 6.2
 
 try:
     print(f"Discharging to End of Discharge Voltage {time.perf_counter()}")
-    while eps.telemetry["VBCROUT"] > EODC:
+    while eps.telemetry["VBCROUT"]() > EODC:
         eps.commands["Pin On"](LOADPDM) # Turn on the load until battery is fully discharged
         time.sleep(.3)
     print(f"Discharge Complete {time.perf_counter()}")
