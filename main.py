@@ -32,18 +32,18 @@ time.sleep(5)
 
 try:
     print(f"Discharging to End of Discharge Voltage {time.perf_counter()}")
-    while eps.telemetry["VBCROUT"]() > EODC:
+    while battery.telemetry["VBAT"]() > EODC:
         time.sleep(.5)
         eps.commands["Pin On"](LOADPDM) # Turn on the load until battery is fully discharged
         time.sleep(.5)
     print(f"Discharge Complete {time.perf_counter()}")
 
-    charging = False # Charging or discharging
+    charging = True # Charging or discharging
+    eps.commands["Pin Off"](LOADPDM) # Configure for charge
+    eps.commands["Pin On"](FETPDM)
     lastpolltime = time.perf_counter()
     cycle = 0
     while cycle < 6:
-        time.sleep(.5)
-
         v, i, tbat1, tbat2, tbat3, tbat4, tbrd = battery.telem_summary() # Collect all telemetry at once
         recordtime = time.perf_counter()
         chargeWh += v * i * (recordtime - lastpolltime) / 3600
