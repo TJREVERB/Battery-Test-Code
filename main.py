@@ -39,7 +39,7 @@ try:
     print(f"Discharge Complete {time.perf_counter()}")
 
     charging = True # Charging or discharging
-    eps.commands["Pin Off"](LOADPDM)
+    eps.commands["Pin Off"](LOADPDM) # Configure for charge
     eps.commands["Pin On"](FETPDM)
     lastpolltime = time.perf_counter()
     cycle = 0
