@@ -32,23 +32,24 @@ time.sleep(5)
 
 try:
     print(f"Discharging to End of Discharge Voltage {time.perf_counter()}")
-    while eps.telemetry["VBCROUT"]() > EODC:
+    while battery.telemetry["VBAT"]() > EODC:
         time.sleep(.5)
         eps.commands["Pin On"](LOADPDM) # Turn on the load until battery is fully discharged
         time.sleep(.5)
     print(f"Discharge Complete {time.perf_counter()}")
 
-    charging = False # Charging or discharging
+    charging = True # Charging or discharging
+    eps.commands["Pin Off"](LOADPDM)
+    eps.commands["Pin On"](FETPDM)
     lastpolltime = time.perf_counter()
     cycle = 0
     while cycle < 6:
-        time.sleep(.5)
-
         v, i, tbat1, tbat2, tbat3, tbat4, tbrd = battery.telem_summary() # Collect all telemetry at once
         recordtime = time.perf_counter()
         chargeWh += v * i * (recordtime - lastpolltime) / 3600
         chargeAh += i * (recordtime - lastpolltime) / 3600
-        print(f"{chargeWh}, {chargeAh}, {v}, {i}, {recordtime}, {tbat1}, {tbat2}, {tbat3}, {tbat4}, {tbrd}, {cycle}")
+        lastpolltime = recordtime
+        #print(f"{chargeWh}, {chargeAh}, {v}, {i}, {recordtime}, {tbat1}, {tbat2}, {tbat3}, {tbat4}, {tbrd}, {cycle}")
         log = open(filename, "a")
         if charging:
             log.write(f"{chargeWh},{chargeAh},{v},{i},{recordtime},{tbat1},{tbat2},{tbat3},{tbat4},{tbrd},{cycle},chg\n")
@@ -61,12 +62,13 @@ try:
         if charging and v > EOC: # EPS Min value of EOC voltage
             if abs(i) < 0.05: # Battery termination current 50mA
                 tstart = time.perf_counter()
+                print(f"Charge Finished, {chargeWh} Wh")
                 print(f"Beginning Charge Hold {tstart}")
                 while time.perf_counter() - tstart < 60 * 10: # Wait for ten minutes, pinging battery and eps for telemetry in the mean time
                     time.sleep(.5)
                     v, i, tbat1, tbat2, tbat3, tbat4, tbrd = battery.telem_summary()
 
-                    print(f"{chargeWh}, {chargeAh}, {v}, {i}, {recordtime}, {tbat1}, {tbat2}, {tbat3}, {tbat4}, {tbrd}, {cycle}")
+                    #print(f"{chargeWh}, {chargeAh}, {v}, {i}, {recordtime}, {tbat1}, {tbat2}, {tbat3}, {tbat4}, {tbrd}, {cycle}")
                     chargeWh += v * i * (recordtime - lastpolltime) / 3600
                     chargeAh += i * (recordtime - lastpolltime) / 3600
                     log = open(filename, "a")
@@ -80,7 +82,7 @@ try:
                 charging = False
         
         if (not charging) and v < EODC:
-            print("Discharge Finished, configuring for charge and incrementing cycle")
+            print(f"Discharge Finished, configuring for charge and incrementing cycle, capacity {chargeWh} Wh")
             eps.commands["Pin Off"](LOADPDM) # Configure for charge
             eps.commands["Pin On"](FETPDM)
             charging = True
